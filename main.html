@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quad Camera View</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css"/>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen flex items-center justify-center p-4">
+  <canvas id="captureCanvas" class="hidden"></canvas>
+
+  <div class="container mx-auto p-4 max-w-6xl w-full">
+    <header class="text-center mb-8">
+      <h1 class="text-4xl sm:text-5xl font-bold text-white mb-2">
+        Quad Cam <span class="text-cyan-400">Pro</span>
+      </h1>
+      <p class="text-lg text-gray-400">Your 2x2 Professional Video Feed</p>
+    </header>
+
+    <div class="relative w-full max-w-4xl mx-auto">
+      <div id="videoGrid" class="grid grid-cols-2 grid-rows-2 gap-2 aspect-video bg-black rounded-lg overflow-hidden video-grid">
+        <div id="flashEffect" class="absolute inset-0 bg-white opacity-0 pointer-events-none transition-opacity duration-300 z-10"></div>
+        <video class="w-full h-full" id="video1" playsinline autoplay muted></video>
+        <video class="w-full h-full" id="video2" playsinline autoplay muted></video>
+        <video class="w-full h-full" id="video3" playsinline autoplay muted></video>
+        <video class="w-full h-full" id="video4" playsinline autoplay muted></video>
+      </div>
+    </div>
+
+    <div id="controlsContainer" class="text-center mt-8 min-h-[80px] flex flex-col justify-start items-center">
+      <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
+        <button id="startButton" class="btn bg-cyan-500 text-gray-900 font-bold py-3 px-8 rounded-lg shadow-lg shadow-cyan-500/30 flex items-center gap-3">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"><path d="m5 3 14 9-14 9V3z"/></svg>
+          Start Camera
+        </button>
+        <button id="captureButton" class="btn bg-cyan-500 text-gray-900 font-bold py-3 px-8 rounded-lg shadow-lg shadow-cyan-500/30 hidden flex items-center gap-3">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="13" r="4"/><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/></svg>
+          Capture
+        </button>
+        <!-- Settings Button -->
+        <button id="settingsButton" class="btn bg-gray-800 text-cyan-400 font-bold py-3 px-6 rounded-lg flex items-center gap-2 shadow-md">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06A1.65 1.65 0 0 0 15 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 8.6 15a1.65 1.65 0 0 0-1.82-.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 15 8.6c.33 0 .66.04.97.11"/></svg>
+          Settings
+        </button>
+      </div>
+      <p id="errorMessage" class="text-red-500 mt-4 font-medium"></p>
+    </div>
+  </div>
+
+  <!-- Settings Sidebar -->
+  <div id="settingsPanel" class="fixed top-0 right-0 h-full w-80 bg-gray-800 text-gray-100 shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out z-50 p-6 overflow-y-auto">
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-2xl font-bold text-cyan-400">Settings</h2>
+      <button id="closeSettings" class="text-gray-400 hover:text-white">&times;</button>
+    </div>
+
+    <!-- Camera Selector -->
+    <div class="mb-4">
+      <label class="block mb-2 font-semibold">Camera Selector</label>
+      <select id="cameraSelect" class="w-full p-2 bg-gray-700 rounded-lg"></select>
+    </div>
+
+    <!-- Resolution Selector -->
+    <div class="mb-4">
+      <label class="block mb-2 font-semibold">Resolution</label>
+      <select id="resolutionSelect" class="w-full p-2 bg-gray-700 rounded-lg">
+        <option value="640x480">480p</option>
+        <option value="1280x720" selected>720p</option>
+        <option value="1920x1080">1080p</option>
+        <option value="3840x2160">4K</option>
+      </select>
+    </div>
+
+    <!-- Toggles -->
+    <div class="space-y-3">
+      <label class="flex items-center justify-between cursor-pointer">
+        <span>Mirror</span>
+        <input type="checkbox" id="mirrorToggle" class="form-checkbox h-5 w-5 text-cyan-500">
+      </label>
+      <label class="flex items-center justify-between cursor-pointer">
+        <span>Grid</span>
+        <input type="checkbox" id="gridToggle" class="form-checkbox h-5 w-5 text-cyan-500" checked>
+      </label>
+      <label class="flex items-center justify-between cursor-pointer">
+        <span>Flash</span>
+        <input type="checkbox" id="flashToggle" class="form-checkbox h-5 w-5 text-cyan-500" checked>
+      </label>
+      <label class="flex items-center justify-between cursor-pointer">
+        <span>Dark / Light Theme</span>
+        <input type="checkbox" id="themeToggle" class="form-checkbox h-5 w-5 text-cyan-500">
+      </label>
+    </div>
+  </div>
+
+  <script>
+    const startButton = document.getElementById('startButton');
+    const captureButton = document.getElementById('captureButton');
+    const settingsButton = document.getElementById('settingsButton');
+    const closeSettings = document.getElementById('closeSettings');
+    const settingsPanel = document.getElementById('settingsPanel');
+    const cameraSelect = document.getElementById('cameraSelect');
+    const resolutionSelect = document.getElementById('resolutionSelect');
+    const mirrorToggle = document.getElementById('mirrorToggle');
+    const gridToggle = document.getElementById('gridToggle');
+    const flashToggle = document.getElementById('flashToggle');
+    const themeToggle = document.getElementById('themeToggle');
+    const errorMessage = document.getElementById('errorMessage');
+    const captureCanvas = document.getElementById('captureCanvas');
+    const flashEffect = document.getElementById('flashEffect');
+    const videoGrid = document.getElementById('videoGrid');
+    const videoElements = [
+      document.getElementById('video1'),
+      document.getElementById('video2'),
+      document.getElementById('video3'),
+      document.getElementById('video4')
+    ];
+    let activeStream = null;
+
+    // Open/close settings
+    settingsButton.addEventListener('click', () => settingsPanel.classList.remove('translate-x-full'));
+    closeSettings.addEventListener('click', () => settingsPanel.classList.add('translate-x-full'));
+
+    // Populate cameras
+    async function loadCameras() {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const videoDevices = devices.filter(d => d.kind === 'videoinput');
+      cameraSelect.innerHTML = videoDevices.map((d, i) => `<option value="${d.deviceId}">${d.label || 'Camera ' + (i+1)}</option>`).join('');
+    }
+    loadCameras();
+
+    // Start camera
+    startButton.addEventListener('click', async () => {
+      startButton.classList.add('opacity-70');
+      errorMessage.textContent = '';
+      try {
+        const [width, height] = resolutionSelect.value.split('x').map(Number);
+        const constraints = { video: { deviceId: cameraSelect.value ? { exact: cameraSelect.value } : undefined, width, height }, audio: false };
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        activeStream = stream;
+        videoElements.forEach(v => { v.srcObject = stream; v.play(); });
+        startButton.classList.add('hidden');
+        captureButton.classList.remove('hidden');
+      } catch (err) {
+        errorMessage.textContent = "Error accessing camera.";
+      } finally {
+        startButton.classList.remove('opacity-70');
+      }
+    });
+
+    // Mirror toggle
+    mirrorToggle.addEventListener('change', e => {
+      const flip = e.target.checked ? 'scaleX(1)' : 'scaleX(-1)';
+      videoElements.forEach(v => v.style.transform = flip);
+    });
+
+    // Grid toggle
+    gridToggle.addEventListener('change', e => {
+      videoGrid.classList.toggle('border-0', !e.target.checked);
+      videoGrid.classList.toggle('shadow-none', !e.target.checked);
+    });
+
+    // Flash toggle
+    flashToggle.addEventListener('change', e => {
+      flashEffect.style.display = e.target.checked ? 'block' : 'none';
+    });
+
+    // Theme toggle
+    themeToggle.addEventListener('change', e => {
+      document.body.classList.toggle('light-theme', e.target.checked);
+    });
+
+    // Capture (kept original)
+    captureButton.addEventListener('click', () => {
+      if (!activeStream || videoElements[0].videoWidth === 0) return;
+      const video = videoElements[0];
+      const vw = video.videoWidth, vh = video.videoHeight;
+      captureCanvas.width = vw * 2; captureCanvas.height = vh * 2;
+      const ctx = captureCanvas.getContext('2d');
+      ctx.clearRect(0, 0, captureCanvas.width, captureCanvas.height);
+      ctx.save(); ctx.scale(-1, 1);
+      ctx.drawImage(video, -vw, 0, vw, vh);
+      ctx.drawImage(video, -(vw * 2), 0, vw, vh);
+      ctx.drawImage(video, -vw, vh, vw, vh);
+      ctx.drawImage(video, -(vw * 2), vh, vw, vh);
+      ctx.restore();
+      const dataUrl = captureCanvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.href = dataUrl; link.download = 'test_capture.png';
+      document.body.appendChild(link); link.click(); document.body.removeChild(link);
+      if (flashToggle.checked) {
+        flashEffect.style.opacity = '0.8';
+        setTimeout(() => flashEffect.style.opacity = '0', 100);
+      }
+    });
+  </script>
+</body>
+</html>

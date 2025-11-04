@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Webcam</title>
+    <link href="css/index.css" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-white text-gray-800 overflow-hidden">
+    <div class="relative flex flex-col items-center justify-center min-h-screen p-6 z-10">
+        <h1 class="text-6xl md:text-7xl font-bold text-center flex items-center justify-center flex-wrap">
+            <span class="text-pink-500">WEBCAM</span>
+            <div class="relative inline-block w-16 h-16 md:w-20 md:h-20 bg-gray-900 rounded-full align-middle mx-2 border-4 border-gray-300 shadow-inner">
+                <div class="absolute inset-[10px] bg-blue-400 rounded-full opacity-75"></div>
+                <div class="absolute inset-[16px] bg-black rounded-full"></div>
+            </div>
+            <span class="text-indigo-600">TOY</span>
+        </h1>
+        <p class="text-xl md:text-2xl text-gray-600 mt-4 text-center">Take selfies</p>
+        <a href="main.html" class="mt-8 px-10 py-4 bg-gradient-to-b from-pink-500 to-pink-600 text-white text-2xl font-bold rounded-lg shadow-lg hover:from-pink-600 hover:to-pink-700 transition-all transform hover:scale-105 inline-block text-center">&gt; Ready? Smile!</a>
+    </div>
+    <div class="photo-frame" style="top: 15%; right: 12%; transform: rotate(8deg);">
+        <img src="img/A.jpg" class="w-64 rounded">
+    </div>
+    <div class="photo-frame" style="bottom: 12%; left: 15%; transform: rotate(5deg);">
+        <div class="grid grid-cols-2 gap-1">
+            <img src="img/A.jpg" alt="" class="rounded">
+            <img src="img/A.jpg" alt="" class="rounded">
+            <img src="img/A.jpg" alt="" class="rounded">
+            <img src="img/A.jpg" alt="" class="rounded">
+        </div>
+    </div>
+    <div class="photo-frame" style="bottom: 10%; right: 10%; transform: rotate(-7deg);">
+        <div class="grid grid-cols-2 gap-1">
+            <img src="img/A.jpg" alt="" class="rounded">
+            <img src="img/A.jpg" alt="" class="rounded">
+            <img src="img/A.jpg" alt="" class="rounded">
+            <img src="img/A.jpg" alt="" class="rounded">
+        </div>
+    </div>
+</body>
+</html>
